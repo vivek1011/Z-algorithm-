@@ -1,3 +1,5 @@
+// finding the longest common prefix between the sorted suffix strings.
+// making of suffix array 
 #include<bits/stdc++.h>
 using namespace std;
 #define S(x) scanf("%d",&x)
@@ -16,6 +18,8 @@ struct s1
 	int nr[2];
 	int p; 
 }L[10002];
+int sa[100002] ,LCP[10002];
+int stp , cnt;  
 bool cmp(struct s1 a, struct s1 b)
 {
 	return a.nr[0]==b.nr[0] ? (a.nr[1]<b.nr[1]) : (a.nr[0]<b.nr[0]); 
@@ -24,7 +28,6 @@ void fun()
 {
 	for(int i =0;i<n; i++)
 		P[0][i] = s[i] - 'a';
-	int stp , cnt ; 
 	for(stp = 1 ,cnt = 1 ;cnt<n ; cnt*=2, stp++)	
 	{
 		for(int i =0 ; i<n; i++)
@@ -38,11 +41,39 @@ void fun()
 		{
 			P[stp][L[i].p] = i>0 && L[i].nr[0]==L[i-1].nr[0] && L[i].nr[1]==L[i-1].nr[1] ? P[stp][L[i-1].p] : i;
 		}
-	}
-	// basically suffix starting at ith position will come at P[stp-1][i] th postion after sorting all the suffix strings. 
-	for(int i=0 ; i<n; i++)
-	cout<<P[stp-1][i]<<" ";
+	}	
+	for(int i =0;  i<n; i++)
+		sa[P[stp-1][i]] = i; 
 	return ;
+}
+ll power(ll x,ll y)
+{
+	if(y==0) return 1;
+	ll tmp = power(x,y/2); 
+	if(y%2==0) return (tmp*tmp);
+	return ((tmp*tmp))*x;
+}
+ll lcp(int i, int j)
+{
+	if(i==j) return n -i ;
+	ll final =0 ; 
+	for(int k =stp -1; k>=0 && i<n && j<n; k--)
+	{
+		if(P[k][i]==P[k][j]) // means at this point their suffix index was same, add 2^k chars to the final
+		{
+			ll ans = power(2,k);
+			final+=ans ; i+=ans; j+=ans; 
+		}
+	} 
+	return final;
+}
+void constlcp()
+{
+	for(int i =0 ; i<n-1; i++)
+	{
+		LCP[i] = lcp(sa[i] , sa[i+1]); 
+	}
+	return ; 
 }
 int main()
 {
@@ -50,5 +81,9 @@ int main()
 	cin>>s; 
 	n= s.size();
 	fun(); 
+	constlcp(); 
+	for(int i =0 ;  i<n-1 ; i++)
+		cout<<LCP[i]<<" ";
+	cout<<endl;
 	return 0;
 }
